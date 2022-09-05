@@ -7,7 +7,7 @@ What was done and why?
 
 I'm learning Golang and using [Github Copilot](https://copilot.github.com/). 
 These two amazing projects gave me the inspiration
-to create this project. 
+to modify this project. 
 
 [binlog2sql](https://github.com/danfengcao/binlog2sql) it's written in Python. 
 
