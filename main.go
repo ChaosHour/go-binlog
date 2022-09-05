@@ -8,7 +8,7 @@ import (
 	"flag"
 	"fmt"
 
-	binlog "github.com/ChaosHour/go-binlog/cmd"
+	binlog "github.com/ChaosHour/go-binlog/cmd/go-binlog"
 )
 
 // Define flags
