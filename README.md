@@ -12,7 +12,27 @@ go install github.com/ChaosHour/go-binlog@latest
 ```
 
 
-```bash
+## Usage
+
+```Go
+go-binlog -h
+Please specify a MySQL binary log file
+  -f string
+    	MySQL binary log file
+  -h	Print help
+
+ go-binlog -f /db/logs01/mysql-bin.000003
+ 
+ [root@primary go-binlog]# go run main.go -f /db/logs01/mysql-bin.000003
+Got QUERY_EVENT:
+	Type:QUERY_EVENT, Time:2022-09-05 02:09:12 +0000 UTC, ServerID:1662343752, EventSize:269, EventEndPos:2680, Flag:0x0
+&{{} 3929 0 0 47 [0 0 0 0 0 1 0 0 0 16 0 0 0 0 6 3 115 116 100 4 33 0 33 0 33 0 12 1 103 114 111 117 112 111 110 95 112 114 111 100 117 99 116 105 111 110 0] groupon_production CREATE TABLE IF NOT EXISTS dictionary (
+  id int(10) unsigned NOT NULL AUTO_INCREMENT,
+  word varchar(100) NOT NULL,
+  mean varchar(300) NOT NULL,
+  PRIMARY KEY (id)
+)}
+```
 What was done and why?  
 
 I'm learning Golang and using [Github Copilot](https://copilot.github.com/). 
@@ -32,7 +52,6 @@ I like the fact, that anyone can run it without having to mess with dependency h
 
 Did I create it? 
 Nope, once again [liipx](https://github.com/liipx/go-mysql-binlog) created this amazing repo and I'm just playing arround to see what I can do with it.
-```
 
 
 ## What files did I change?
@@ -340,16 +359,12 @@ bash-3.2$ diff -rN  go-mysql-binlog/rows_event.go go-binlog/cmd/rows_event.go
 
 ## Removed the doc & test dirs and moved files to cmd
 
-```bash
+
 Did Github Copilot do all of the changes?  Yes, it did.  
 I knew in my head what I wanted it to do, but because I am not a seasond Go Programmer, Github Copilot was kind to assist.
 
 
-I'm I taking creadit for this?  
-Not at all. I'm just testing and sharring what's been done so far.  More to come.
-
-
-
+```bash
 Testing Env:
 
 bash-3.2$ vagrant --version
