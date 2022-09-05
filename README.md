@@ -84,13 +84,13 @@ replica                     running (virtualbox)
 etlreplica                  running (virtualbox)
 
 
-[root@master ~]# mysql --version
+[root@primary ~]# mysql --version
 mysql  Ver 14.14 Distrib 5.6.51-91.0, for Linux (x86_64) using  6.2
 
-[root@master ~]# uname -msrn
+[root@primary ~]# uname -msrn
 Linux master 3.10.0-1160.76.1.el7.x86_64 x86_64
 
-[root@master ~]# hostnamectl
+[root@primary ~]# hostnamectl
    Static hostname: master
          Icon name: computer-vm
            Chassis: vm
