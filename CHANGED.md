@@ -73,7 +73,9 @@ I used parts of what was suggested for a main.go file from the authors github re
 ## Files changed:
 
     
-> for i in $( ls -1 go-binlog/cmd/go-binlog/*); do TB=$( basename ${i}); echo "Current file is ${TB}"; diff -bnrwW 10  go-mysql-binlog/${TB} go-binlog/cmd/go-binlog/${TB}; sleep 0.1 ; done
+```Bash 
+for i in $( ls -1 go-binlog/cmd/go-binlog/*); do TB=$( basename ${i}); echo "Current file is ${TB}"; diff -bnrwW 10  go-mysql-binlog/${TB} go-binlog/cmd/go-binlog/${TB}; sleep 0.1 ; done
+```
 ```Go
 Current file is LICENSE
 Current file is checksum.go
