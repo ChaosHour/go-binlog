@@ -11,6 +11,12 @@ or
 go install github.com/ChaosHour/go-binlog@latest
 ```
 
+> I'm using these in my my.cnf file:
+
+```ini
+binlog_format = ROW
+binlog_row_image = FULL
+```
 
 ## Usage
 
