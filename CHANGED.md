@@ -48,18 +48,22 @@ Only in go-binlog: main.go
 
 bash-3.2$ tree go-binlog
 go-binlog
+├── CHANGED.md
+├── LICENSE
+├── README.md
 ├── cmd
-│   ├── LICENSE
-│   ├── checksum.go
-│   ├── const.go
-│   ├── decoder.go
-│   ├── event.go
-│   ├── rows_event.go
-│   └── util.go
+│   └── go-binlog
+│       ├── LICENSE
+│       ├── checksum.go
+│       ├── const.go
+│       ├── decoder.go
+│       ├── event.go
+│       ├── rows_event.go
+│       └── util.go
 ├── go.mod
 └── main.go
 
-1 directory, 9 files
+2 directories, 12 files
 ```
 
 ## Note:
@@ -68,8 +72,13 @@ I used parts of what was suggested for a main.go file from the authors github re
 
 ## Files changed:
 
-```Go     
-bash-3.2$ diff -rN  go-mysql-binlog/const.go go-binlog/cmd/const.go
+```bash    
+for i in $( ls -1 go-binlog/cmd/go-binlog/*); do TB=$( basename ${i}); echo "Current file is ${TB}"; diff -rNB  go-mysql-binlog/${TB} go-binlog/cmd/go-binlog/${TB}; sleep 0.1 ; done
+```
+```Go
+Current file is LICENSE
+Current file is checksum.go
+Current file is const.go
 60,95c60,133
 < 	UnknownEvent           = 0x00
 < 	StartEventV3           = 0x01
@@ -279,10 +288,8 @@ bash-3.2$ diff -rN  go-mysql-binlog/const.go go-binlog/cmd/const.go
 > 	IgnorableEventV2:         "IGNORABLE_EVENTv2",
 > 	RowsQueryEventV2:         "ROWS_QUERY_EVENTv2",
 > 	TableMapEventV3:          "TABLE_MAP_EVENTv3",
-
-
-
-bash-3.2$ diff -rN  go-mysql-binlog/event.go go-binlog/cmd/event.go
+Current file is decoder.go
+Current file is event.go
 175c175,176
 < 	desc.MySQLVersion = string(bytes.Trim(data[pos:pos+50], string(0x00)))
 ---
@@ -317,13 +324,11 @@ bash-3.2$ diff -rN  go-mysql-binlog/event.go go-binlog/cmd/event.go
 > 	Flags    uint16
 > 	Checksum uint32
 > }
-
-
-
-bash-3.2$ diff -rN  go-mysql-binlog/rows_event.go go-binlog/cmd/rows_event.go
+Current file is rows_event.go
 182a183,184
 > 	case WriteRowsEventV3, UpdateRowsEventV3, DeleteRowsEventV3:
 > 		e.Version = 3
+Current file is util.go
 ```
 
 
