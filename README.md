@@ -4,11 +4,19 @@
 ## Install 
 
 ```Go
-go get github.com/ChaosHour/go-binlog
 
-or  
+mkdir -p  go/{src,bin,pkg}  
 
 go install github.com/ChaosHour/go-binlog@latest
+
+
+[root@primary ~]# go install github.com/ChaosHour/go-binlog@latest
+go: downloading github.com/ChaosHour/go-binlog v0.0.0-20220906163523-b9774708b3e6
+
+[root@primary ~]# ls -lrt go/bin
+total 2056
+-rwxr-xr-x. 1 root root 2104276 Sep  6 18:44 go-binlog
+
 ```
 
 > I'm using these in my my.cnf file:
