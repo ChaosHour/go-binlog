@@ -1,5 +1,7 @@
 # go-binlog
 
+> It's not perfect and more work needs to be done. But it's a start.
+
 
 ## Install 
 
