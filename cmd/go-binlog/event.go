@@ -406,17 +406,17 @@ type BinRowsQueryEvent struct {
 	Query         string
 }
 
-//	Binlog_version_event
-//	https://dev.mysql.com/doc/internals/en/binlog-version-event.html
-//	The binlog_version_event is added to the binlog as last event to tell the reader what binlog version was used.
+// Binlog_version_event
+// https://dev.mysql.com/doc/internals/en/binlog-version-event.html
+// The binlog_version_event is added to the binlog as last event to tell the reader what binlog version was used.
 type BinLogVersionEvent struct {
 	BaseEventBody
 	Version uint16
 }
 
-//	Binlog_checksum_event
-//	https://dev.mysql.com/doc/internals/en/binlog-checksum-event.html
-//	The binlog_checksum_event is added to the binlog as last event to tell the reader what binlog checksum was used.
+// Binlog_checksum_event
+// https://dev.mysql.com/doc/internals/en/binlog-checksum-event.html
+// The binlog_checksum_event is added to the binlog as last event to tell the reader what binlog checksum was used.
 type BinLogChecksumEvent struct {
 	BaseEventBody
 	Flags    uint16

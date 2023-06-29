@@ -89,6 +89,24 @@ type BinFileDecoder struct {
 	*BinaryLogInfo
 }
 
+// GetFilePos return current file position in the binary log file. Added by Kurt Larsen
+func (decoder *BinFileDecoder) GetFilePos() (int64, error) {
+	return decoder.BinFile.Seek(0, io.SeekCurrent)
+}
+
+// Get the StartPos and the EndPos of the binary log file. Added by Kurt Larsen
+func (decoder *BinFileDecoder) GetFilePosRange() (int64, int64, error) {
+	startPos, err := decoder.BinFile.Seek(0, io.SeekStart)
+	if err != nil {
+		return 0, 0, err
+	}
+	endPos, err := decoder.BinFile.Seek(0, io.SeekEnd)
+	if err != nil {
+		return 0, 0, err
+	}
+	return startPos, endPos, nil
+}
+
 // NewBinFileDecoder return a BinFileDecoder with binary log file path
 func NewBinFileDecoder(path string, options ...*BinReaderOption) (*BinFileDecoder, error) {
 	decoder := &BinFileDecoder{
@@ -204,7 +222,11 @@ func (decoder *BinFileDecoder) DecodeEvent() (*BinEvent, error) {
 
 	case WriteRowsEventV0, UpdateRowsEventV0, DeleteRowsEventV0,
 		WriteRowsEventV1, UpdateRowsEventV1, DeleteRowsEventV1,
-		WriteRowsEventV2, UpdateRowsEventV2, DeleteRowsEventV2:
+		WriteRowsEventV2, UpdateRowsEventV2, DeleteRowsEventV2,
+		WriteRowsEventV3, UpdateRowsEventV3, DeleteRowsEventV3,
+		WriteRowsEventV4, UpdateRowsEventV4, DeleteRowsEventV4,
+		WriteRowsEventV5, UpdateRowsEventV5, DeleteRowsEventV5:
+
 		// ROWS_EVENT
 		eventBody, err = decodeRowsEvent(data, decoder.description, event.Header.EventType)
 
