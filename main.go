@@ -3,7 +3,7 @@
 // I modified the code in this repo: https://github.com/liipx/go-mysql-binlog
 
 /*
-Copyright 2023 Kurt Larsen (ChasHour)
+Copyright 2023 Kurt Larsen (ChaosHour)
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
