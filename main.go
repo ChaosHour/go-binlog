@@ -23,28 +23,22 @@ package main
 import (
 	"flag"
 	"fmt"
-	"io/ioutil"
-	"log"
-	"os"
 	"strconv"
-	"strings"
-
-	"database/sql"
 
 	"github.com/fatih/color"
-	_ "github.com/go-sql-driver/mysql"
 
 	binlog "github.com/ChaosHour/go-binlog/cmd/go-binlog"
 )
 
 // Define flags
 var (
-	file     = flag.String("f", "", "MySQL binary log file")
-	database = flag.String("d", "", "MySQL database name")
-	table    = flag.String("t", "", "MySQL table name")
-	startPos = flag.Int("s", 0, "Start position")
-	endPos   = flag.Int("e", 0, "End position")
-	help     = flag.Bool("h", false, "Print help")
+	file = flag.String("f", "", "MySQL binary log file")
+	//database    = flag.String("d", "", "MySQL database name")
+	//table       = flag.String("t", "", "MySQL table name")
+	startPos    = flag.Int("s", 0, "Start position")
+	endPos      = flag.Int("e", 0, "End position")
+	tableCounts = flag.Bool("c", false, "Table counts - experamental")
+	help        = flag.Bool("h", false, "Print help")
 )
 
 // define colors
@@ -56,29 +50,6 @@ var blue = color.New(color.FgBlue).SprintFunc()
 // parse flags
 func init() {
 	flag.Parse()
-}
-
-// global variables
-var (
-	db  *sql.DB
-	err error
-)
-
-// read the ~/.my.cnf file to get the database credentials
-func readMyCnf() {
-	file, err := ioutil.ReadFile(os.Getenv("HOME") + "/.my.cnf")
-	if err != nil {
-		log.Fatal(err)
-	}
-	lines := strings.Split(string(file), "\n")
-	for _, line := range lines {
-		if strings.HasPrefix(line, "user") {
-			os.Setenv("MYSQL_USER", strings.TrimSpace(line[5:]))
-		}
-		if strings.HasPrefix(line, "password") {
-			os.Setenv("MYSQL_PASSWORD", strings.TrimSpace(line[9:]))
-		}
-	}
 }
 
 // main function
@@ -101,6 +72,7 @@ func main() {
 
 	num := 0
 	maxEventCount := 0
+	tableCountsMap := make(map[string]int)
 	err = decoder.WalkEvent(func(event *binlog.BinEvent) (isContinue bool, err error) {
 		if *startPos == 0 && *endPos == 0 {
 			fmt.Printf("Got %s: \n\t", binlog.EventType2Str[event.Header.EventType])
@@ -112,6 +84,12 @@ func main() {
 			if num > maxEventCount {
 				maxEventCount = num
 			}
+			if *tableCounts {
+				if event.Header.EventType == binlog.TableMapEvent {
+					tableID := strconv.FormatUint(event.Body.(*binlog.BinTableMapEvent).TableID, 10)
+					tableCountsMap[tableID]++
+				}
+			}
 		} else if event.Header.LogPos >= int64(*startPos) && event.Header.LogPos <= int64(*endPos) {
 			fmt.Printf("Got %s: \n\t", binlog.EventType2Str[event.Header.EventType])
 			fmt.Println(event.Header)
@@ -122,8 +100,14 @@ func main() {
 			if num > maxEventCount {
 				maxEventCount = num
 			}
-		}
-		if *endPos != 0 && event.Header.LogPos > int64(*endPos) {
+			switch body := event.Body.(type) {
+			case *binlog.BinTableMapEvent:
+				// body is of type *binlog.BinTableMapEvent
+				tableID := strconv.FormatUint(body.TableID, 10)
+				tableCountsMap[tableID]++
+			}
+
+		} else if event.Header.LogPos > int64(*endPos) {
 			return false, nil
 		}
 		return true, nil
@@ -143,4 +127,27 @@ func main() {
 
 	fmt.Printf("Read %d events\n", maxEventCount)
 	fmt.Printf("End position of binlog: %s\n", posStr)
+
+	/*
+		if *tableCounts {
+			for tableID, count := range tableCountsMap {
+				fmt.Printf("%d %s\n", count, tableID)
+			}
+	*/
+	if *tableCounts {
+		fmt.Println("Counting tables...")
+		err = decoder.WalkEvent(func(event *binlog.BinEvent) (isContinue bool, err error) {
+			if event.Header.EventType == binlog.TableMapEvent {
+				tableID := strconv.FormatUint(event.Body.(*binlog.BinTableMapEvent).TableID, 10)
+				tableCountsMap[tableID]++
+			}
+			return true, nil
+		})
+		if err != nil {
+			panic(err)
+		}
+		for tableID, count := range tableCountsMap {
+			fmt.Printf("%d %s\n", count, tableID)
+		}
+	}
 }

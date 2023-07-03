@@ -13,3 +13,9 @@
 
 # Dependency directories (remove the comment below to include it)
 # vendor/
+
+# MySQL binary logs
+*mysql-bin.000001*
+*mysql-bin.000002*
+*mysql-bin.000003*
+*mysql-bin.*
