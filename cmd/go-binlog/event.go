@@ -29,15 +29,21 @@ type BinEventBody interface {
 	isEventBody()
 }
 
-// BinEvent binary log event definition
+// BinEvent binary log event definition - Kurt Larsen (ChaosHour) added the following:
 type BinEvent struct {
 	Header       *BinEventHeader
 	Body         BinEventBody
 	ChecksumType byte
 	ChecksumVal  []byte
+	DatabaseName string   // Kurt Larsen (ChaosHour) added this
+	TableName    string   // Kurt Larsen (ChaosHour) added this
+	ColumnCount  uint64   // Kurt Larsen (ChaosHour) added this
+	ColumnTypes  []byte   // Kurt Larsen (ChaosHour) added this
+	ColumnNames  []string // Kurt Larsen (ChaosHour) added this
 }
 
-// Validation event validity check
+/*
+// Validation event validity check - Kurt Larsen (ChaosHour) added this Original code below:
 func (event *BinEvent) Validation(bin *BinaryLogInfo, header, body []byte) ([]byte, error) {
 	if bin == nil {
 		return body, fmt.Errorf("empty BinaryLogInfo")
@@ -63,6 +69,51 @@ func (event *BinEvent) Validation(bin *BinaryLogInfo, header, body []byte) ([]by
 	}
 
 	return body, nil
+}
+*/
+
+// Validation event validity check - Kurt Larsen (ChaosHour) added this:
+func (event *BinEvent) Validation(bin *BinaryLogInfo, header, body []byte) ([]byte, error) {
+	// Check if BinaryLogInfo object is nil
+	if bin == nil {
+		return body, fmt.Errorf("empty BinaryLogInfo")
+	}
+
+	// Check if event header is nil
+	if event.Header == nil {
+		return body, fmt.Errorf("empty event header")
+	}
+
+	// Check if event size matches the sum of the length of the header and body
+	if l := int64(len(body) + len(header)); l != event.Header.EventSize {
+		return body, fmt.Errorf("event size got %d need %d", l, event.Header.EventSize)
+	}
+
+	// Check if binary log has a checksum
+	if bin.description != nil && bin.description.hasCheckSum {
+		// Calculate the index of the checksum value in the body slice
+		index := len(body) - binlogChecksumLength - 1
+
+		// Set the checksum type and value in the BinEvent object
+		event.ChecksumType = body[index]
+		event.ChecksumVal = body[index+1:]
+
+		// Truncate the body slice to remove the checksum value
+		body = body[:index+1]
+
+		// Validate the checksum value
+		if !ChecksumValidate(event.ChecksumType, event.ChecksumVal, append(header, body...)) || len(event.ChecksumVal) != 4 {
+			return body, fmt.Errorf("binlog checksum validation failed")
+		}
+	}
+
+	// Return the body slice and nil error if no errors were encountered
+	return body, nil
+}
+
+// String interface implement - Kurt Larsen (ChaosHour) added this:
+func (event *BinEvent) String() string {
+	return fmt.Sprintf("Header:%s, Body:%s", event.Header, event.Body)
 }
 
 // BaseEventBody is base off all events
@@ -338,6 +389,11 @@ func (event *BinQueryEvent) Statue() error {
 	return nil
 }
 
+// TODO decode QUERY_EVENT status_var
+func (event *BinQueryEvent) String() string {
+	return fmt.Sprintf("%s %s", event.Schema, event.Query)
+}
+
 // BinXIDEvent is the definition of XID_EVENT
 // https://dev.mysql.com/doc/internals/en/xid-event.html
 // Transaction ID for 2PC, written whenever a COMMIT is expected.
@@ -406,17 +462,17 @@ type BinRowsQueryEvent struct {
 	Query         string
 }
 
-//	Binlog_version_event
-//	https://dev.mysql.com/doc/internals/en/binlog-version-event.html
-//	The binlog_version_event is added to the binlog as last event to tell the reader what binlog version was used.
+// Binlog_version_event
+// https://dev.mysql.com/doc/internals/en/binlog-version-event.html
+// The binlog_version_event is added to the binlog as last event to tell the reader what binlog version was used.
 type BinLogVersionEvent struct {
 	BaseEventBody
 	Version uint16
 }
 
-//	Binlog_checksum_event
-//	https://dev.mysql.com/doc/internals/en/binlog-checksum-event.html
-//	The binlog_checksum_event is added to the binlog as last event to tell the reader what binlog checksum was used.
+// Binlog_checksum_event
+// https://dev.mysql.com/doc/internals/en/binlog-checksum-event.html
+// The binlog_checksum_event is added to the binlog as last event to tell the reader what binlog checksum was used.
 type BinLogChecksumEvent struct {
 	BaseEventBody
 	Flags    uint16
